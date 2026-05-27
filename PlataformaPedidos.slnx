@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PlataformaPedidos.Dominio/PlataformaPedidos.Dominio.csproj" />
+  <Project Path="PlataformaPedidos.Servicios/PlataformaPedidos.Servicios.csproj" />
+</Solution>
