@@ -54,7 +54,24 @@ public class ServicioPedidos : IServicioPedidos
 
     public bool ConfirmarPedido(Guid pedidoId)
     {
-        throw new NotImplementedException();
+        Pedido pedido = _repositorioPedidos.GetById(pedidoId);
+
+        if (pedido == null)
+        {
+            return false;
+        }
+
+        if (pedido.Estado != EstadoPedido.Pendiente)
+        {
+            return false;
+        }
+
+        pedido.Estado = EstadoPedido.Confirmado;
+        pedido.FechaConfirmacion = DateTime.UtcNow;
+
+        bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
+
+        return graboBien;
     }
 
     public bool CancelarPedido(Guid pedidoId)
