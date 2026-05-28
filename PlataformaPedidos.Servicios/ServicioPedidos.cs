@@ -54,6 +54,7 @@ public class ServicioPedidos : IServicioPedidos
 
     public bool ConfirmarPedido(Guid pedidoId)
     {
+        //todo: aun no lo hice, pero prometo hacerlo
         throw new NotImplementedException();
     }
 
