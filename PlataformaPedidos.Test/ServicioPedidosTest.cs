@@ -140,6 +140,7 @@ public class ServicioPedidosTest
         Assert.Equal(EstadoPedido.Cancelado, pedido.Estado);
         Assert.True(resultado);
         
+        repoMock.Received(1).GetById(pedidoId);
         repoMock.Received(0).SaveOrUpdate(pedido);
         
     }
@@ -162,6 +163,9 @@ public class ServicioPedidosTest
         
         Assert.Equal(EstadoPedido.Cancelado, pedido.Estado);
         Assert.True(resultado);
+        
+        repoMock.Received(1).GetById(pedidoId);
+        repoMock.Received(1).SaveOrUpdate(pedido);
     }
     
     
@@ -183,6 +187,9 @@ public class ServicioPedidosTest
         
         Assert.Equal(EstadoPedido.Cancelado, pedido.Estado);
         Assert.False(resultado);
+        
+        repoMock.Received(1).GetById(pedidoId);
+        repoMock.Received(1).SaveOrUpdate(pedido);
     }
 
     [Fact]
@@ -200,7 +207,10 @@ public class ServicioPedidosTest
         
         bool resultado = servicio.CancelarPedido(pedidoId);
         Assert.Equal(EstadoPedido.Confirmado, pedido.Estado);
-        Assert. False(resultado);
+        Assert.False(resultado);
+        
+        repoMock.Received(1).GetById(pedidoId);
+        repoMock.Received(0).SaveOrUpdate(pedido);
     }
 
     [Fact]
@@ -215,6 +225,9 @@ public class ServicioPedidosTest
         
         bool resultado = servicio.CancelarPedido(pedidoId);
         Assert.False(resultado);
+        
+        repoMock.Received(1).GetById(pedidoId);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
     }
 
-}
+}   
