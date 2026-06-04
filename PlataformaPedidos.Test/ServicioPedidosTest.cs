@@ -33,6 +33,9 @@ public class ServicioPedidosTest
         
         Assert.Equal(EstadoPedido.Cancelado, pedido.Estado);
         Assert.True(resultado);
+        
+        repoMock.Received(0).SaveOrUpdate(pedido);
+        
     }
 
     [Fact]
