@@ -59,6 +59,24 @@ public class ServicioPedidos : IServicioPedidos
 
     public bool CancelarPedido(Guid pedidoId)
     {
-        throw new NotImplementedException();
+        
+        Pedido pedido = _repositorioPedidos.GetById(pedidoId);
+        if (pedido == null)
+        {
+            return false;
+        }
+
+        if (pedido.Estado == EstadoPedido.Cancelado)
+        {
+            return true;
+        }
+
+        if (pedido.Estado == EstadoPedido.Pendiente)
+        {
+            pedido.Estado = EstadoPedido.Cancelado;
+            return _repositorioPedidos.SaveOrUpdate(pedido);
+        }
+
+        return false;
     }
 }
