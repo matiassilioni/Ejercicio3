@@ -62,15 +62,17 @@ public class ServicioPedidos : IServicioPedidos
         
         Pedido pedido = _repositorioPedidos.GetById(pedidoId);
 
-        if (pedido == null)
+        if (pedido == null || pedidoId == Guid.Empty)
         {
             return false;
         }
+
         if (pedido.Estado == EstadoPedido.Cancelado)
         {
             return true;
         }
-        if (pedido.Estado == EstadoPedido.Pendiente)
+        
+        if (pedido.Estado != EstadoPedido.Cancelado)
         {
             pedido.Estado = EstadoPedido.Cancelado;
             return _repositorioPedidos.SaveOrUpdate(pedido);
