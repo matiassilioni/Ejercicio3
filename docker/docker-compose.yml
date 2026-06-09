@@ -1,0 +1,64 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: plataforma-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: plataforma_pedidos
+      MYSQL_USER: pedidos_user
+      MYSQL_PASSWORD: pedidos_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
+  postgres:
+    image: postgres:16
+    container_name: plataforma-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: plataforma_pedidos
+      POSTGRES_USER: pedidos_user
+      POSTGRES_PASSWORD: pedidos_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pedidos_user -d plataforma_pedidos"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
+  mongo:
+    image: mongo:7
+    container_name: plataforma-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_DATABASE: plataforma_pedidos
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo/init.js:/docker-entrypoint-initdb.d/init.js
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet -u admin -p adminpassword --authenticationDatabase admin
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  postgres_data:
+  mongo_data:
