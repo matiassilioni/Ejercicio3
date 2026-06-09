@@ -2,4 +2,5 @@
   <Project Path="PlataformaPedidos.Dominio/PlataformaPedidos.Dominio.csproj" />
   <Project Path="PlataformaPedidos.Servicios/PlataformaPedidos.Servicios.csproj" />
   <Project Path="PlataformaPedidos.Test/PlataformaPedidos.Test.csproj" />
+  <Project Path="PlataformaPedidos.Persistencia.Postgress/PlataformaPedidos.Persistencia.Postgress.csproj" />
 </Solution>
