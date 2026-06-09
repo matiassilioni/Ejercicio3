@@ -31,6 +31,7 @@ public class ServicioPedidos : IServicioPedidos
             return false;
         }
 
+        pedido.Id = Guid.NewGuid();
         pedido.Estado = EstadoPedido.Pendiente;
         pedido.FechaConfirmacion = null;
         pedido.FechaCreacion = DateTime.UtcNow;
