@@ -1,3 +1,6 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace PlataformaPedidos.Persistencia.Mongodb;
@@ -5,6 +8,11 @@ namespace PlataformaPedidos.Persistencia.Mongodb;
 public class MongoDbContext
 {
     private readonly IMongoDatabase _database;
+
+    static MongoDbContext()
+    {
+        BsonSerializer.RegisterSerializer(typeof(Guid), new GuidSerializer(GuidRepresentation.Standard));
+    }
 
     public MongoDbContext(string connectionString, string databaseName)
     {

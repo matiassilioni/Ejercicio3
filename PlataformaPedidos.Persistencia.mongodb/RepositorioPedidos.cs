@@ -25,7 +25,7 @@ public class RepositorioPedidos : IRepositorioPedidos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener pedido con ID {PedidoId}", id);
-            return null;
+            throw;
         }
     }
 
@@ -38,7 +38,7 @@ public class RepositorioPedidos : IRepositorioPedidos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener todos los pedidos");
-            return new List<Pedido>();
+            throw;
         }
     }
 
@@ -55,7 +55,7 @@ public class RepositorioPedidos : IRepositorioPedidos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al guardar o actualizar pedido con ID {PedidoId}", pedido.Id);
-            return false;
+            throw;
         }
     }
 }
