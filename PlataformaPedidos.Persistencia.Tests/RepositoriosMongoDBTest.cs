@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MongoDB.Driver;
 using PlataformaPedidos.Dominio.Enumeraciones;
 using PlataformaPedidos.Dominio.Modelos;
 using PlataformaPedidos.Persistencia.Mongodb;
@@ -18,7 +18,57 @@ public class RepositoriosMongoDBTest
     private static readonly Guid ClienteDemo2Id = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static readonly Guid ProductoAId = Guid.Parse("c3d4e5f6-a7b8-9012-cdef-123456789012");
     private static readonly Guid ProductoBId = Guid.Parse("d4e5f6a7-b8c9-0123-defa-234567890123");
+    private static readonly Guid ProductoCId = Guid.Parse("e5f6a7b8-c9d0-1234-efab-345678901234");
     private static readonly Guid PedidoSeedId = Guid.Parse("f6a7b8c9-d0e1-2345-fabc-456789012345");
+
+    public RepositoriosMongoDBTest()
+    {
+        var context = CreateContext();
+
+        context.Clientes.DeleteMany(_ => true);
+        context.Productos.DeleteMany(_ => true);
+        context.Pedidos.DeleteMany(_ => true);
+
+        context.Clientes.InsertOne(new Cliente { Id = ClienteDemo1Id, Nombre = "Cliente Demo 1" });
+        context.Clientes.InsertOne(new Cliente { Id = ClienteDemo2Id, Nombre = "Cliente Demo 2" });
+
+        context.Productos.InsertOne(new Producto
+        {
+            Id = ProductoAId, Nombre = "Producto A", Descripcion = "Descripción del Producto A",
+            Precio = 100.50m, FechaModificacion = DateTime.UtcNow, Disponible = true
+        });
+        context.Productos.InsertOne(new Producto
+        {
+            Id = ProductoBId, Nombre = "Producto B", Descripcion = "Descripción del Producto B",
+            Precio = 250.00m, FechaModificacion = DateTime.UtcNow, Disponible = true
+        });
+        context.Productos.InsertOne(new Producto
+        {
+            Id = ProductoCId, Nombre = "Producto C", Descripcion = "Descripción del Producto C",
+            Precio = 75.99m, FechaModificacion = DateTime.UtcNow, Disponible = false
+        });
+
+        context.Pedidos.InsertOne(new Pedido
+        {
+            Id = PedidoSeedId,
+            Cliente = new Cliente { Id = ClienteDemo1Id, Nombre = "Cliente Demo 1" },
+            Estado = EstadoPedido.Pendiente,
+            FechaCreacion = DateTime.UtcNow,
+            Total = 201.00m,
+            Detalles = new List<LineaPedido>
+            {
+                new()
+                {
+                    Producto = new Producto
+                    {
+                        Id = ProductoAId, Nombre = "Producto A", Descripcion = "Descripción del Producto A",
+                        Precio = 100.50m, FechaModificacion = DateTime.UtcNow, Disponible = true
+                    },
+                    Cantidad = 2, PrecioUnitario = 100.50m, Subtotal = 201.00m
+                }
+            }
+        });
+    }
 
     // ========== CLIENTES ==========
 

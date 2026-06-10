@@ -1,5 +1,6 @@
-using Microsoft.Extensions.Logging;
+using Dapper;
 using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
 using PlataformaPedidos.Dominio.Enumeraciones;
 using PlataformaPedidos.Dominio.Modelos;
 using PlataformaPedidos.Repositorio.Postgress;
@@ -15,6 +16,40 @@ public class RepositoriosPostgreSQLTest
     private static readonly Guid ClienteDemo2Id = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static readonly Guid ProductoAId = Guid.Parse("c3d4e5f6-a7b8-9012-cdef-123456789012");
     private static readonly Guid ProductoBId = Guid.Parse("d4e5f6a7-b8c9-0123-defa-234567890123");
+    private static readonly Guid ProductoCId = Guid.Parse("e5f6a7b8-c9d0-1234-efab-345678901234");
+    private static readonly Guid PedidoSeedId = Guid.Parse("f6a7b8c9-d0e1-2345-fabc-456789012345");
+
+    public RepositoriosPostgreSQLTest()
+    {
+        using var connection = new NpgsqlConnection(ConnectionString);
+        connection.Execute("DELETE FROM LineasPedido");
+        connection.Execute("DELETE FROM Pedidos");
+        connection.Execute("DELETE FROM Productos");
+        connection.Execute("DELETE FROM Clientes");
+
+        connection.Execute(
+            "INSERT INTO Clientes (Id, Nombre) VALUES (@Id, @Nombre)",
+            new[] {
+                new { Id = ClienteDemo1Id, Nombre = "Cliente Demo 1" },
+                new { Id = ClienteDemo2Id, Nombre = "Cliente Demo 2" }
+            });
+
+        connection.Execute(
+            "INSERT INTO Productos (Id, Nombre, Descripcion, Precio, FechaModificacion, Disponible) VALUES (@Id, @Nombre, @Descripcion, @Precio, @FechaModificacion, @Disponible)",
+            new[] {
+                new { Id = ProductoAId, Nombre = "Producto A", Descripcion = "Descripción del Producto A", Precio = 100.50m, FechaModificacion = DateTime.UtcNow, Disponible = true },
+                new { Id = ProductoBId, Nombre = "Producto B", Descripcion = "Descripción del Producto B", Precio = 250.00m, FechaModificacion = DateTime.UtcNow, Disponible = true },
+                new { Id = ProductoCId, Nombre = "Producto C", Descripcion = "Descripción del Producto C", Precio = 75.99m, FechaModificacion = DateTime.UtcNow, Disponible = false }
+            });
+
+        connection.Execute(
+            "INSERT INTO Pedidos (Id, ClienteId, Estado, FechaCreacion, Total) VALUES (@Id, @ClienteId, @Estado, @FechaCreacion, @Total)",
+            new { Id = PedidoSeedId, ClienteId = ClienteDemo1Id, Estado = (int)EstadoPedido.Pendiente, FechaCreacion = DateTime.UtcNow, Total = 201.00m });
+
+        connection.Execute(
+            "INSERT INTO LineasPedido (PedidoId, ProductoId, Cantidad, PrecioUnitario, Subtotal) VALUES (@PedidoId, @ProductoId, @Cantidad, @PrecioUnitario, @Subtotal)",
+            new { PedidoId = PedidoSeedId, ProductoId = ProductoAId, Cantidad = 2, PrecioUnitario = 100.50m, Subtotal = 201.00m });
+    }
 
     private static ILogger<T> Logger<T>() => NullLogger<T>.Instance;
 
