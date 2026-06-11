@@ -25,7 +25,7 @@ public class RepositorioProductos : IRepositorioProductos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener producto con ID {ProductoId}", id);
-            return null;
+            throw;
         }
     }
 
@@ -38,7 +38,7 @@ public class RepositorioProductos : IRepositorioProductos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener todos los productos");
-            return new List<Producto>();
+            throw;
         }
     }
 
@@ -55,7 +55,7 @@ public class RepositorioProductos : IRepositorioProductos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al guardar o actualizar producto con ID {ProductoId}", producto.Id);
-            return false;
+            throw;
         }
     }
 }

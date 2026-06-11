@@ -54,13 +54,13 @@ db.productos.insertMany([
 db.pedidos.insertOne({
     _id: UUID('f6a7b8c9-d0e1-2345-fabc-456789012345'),
     Cliente: {
-        Id: UUID('a1b2c3d4-e5f6-7890-abcd-ef1234567890'),
+        _id: UUID('a1b2c3d4-e5f6-7890-abcd-ef1234567890'),
         Nombre: 'Cliente Demo 1'
     },
     Detalles: [
         {
             Producto: {
-                Id: UUID('c3d4e5f6-a7b8-9012-cdef-123456789012'),
+                _id: UUID('c3d4e5f6-a7b8-9012-cdef-123456789012'),
                 Nombre: 'Producto A',
                 Descripcion: 'Descripción del Producto A',
                 Precio: 100.50,

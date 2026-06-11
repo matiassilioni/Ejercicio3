@@ -25,7 +25,7 @@ public class RepositorioClientes : IRepositorioClientes
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al obtener cliente con ID {ClienteId}", id);
-            return null;
+            throw;
         }
     }
 
@@ -42,7 +42,7 @@ public class RepositorioClientes : IRepositorioClientes
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al guardar o actualizar cliente con ID {ClienteId}", cliente.Id);
-            return false;
+            throw;
         }
     }
 }

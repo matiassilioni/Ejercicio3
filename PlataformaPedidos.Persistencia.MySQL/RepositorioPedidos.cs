@@ -57,7 +57,7 @@ public class RepositorioPedidos : IRepositorioPedidos
             var ids = pedidos.Select(p => p.Id).ToList();
 
             var clientes = connection.Query<Cliente>(@"
-                SELECT c.Id, c.Nombre
+                SELECT DISTINCT c.Id, c.Nombre
                 FROM Clientes c
                 INNER JOIN Pedidos p ON p.ClienteId = c.Id
                 WHERE p.Id IN @Ids", new { Ids = ids })
