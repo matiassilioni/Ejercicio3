@@ -7,12 +7,12 @@ namespace PlataformaPedidos.Persistencia.Mongodb;
 
 public class RepositorioPedidos : IRepositorioPedidos
 {
-    private readonly MongoDbContext _context;
+    private readonly IMongoCollection<Pedido> _pedidos;
     private readonly ILogger<RepositorioPedidos> _logger;
 
-    public RepositorioPedidos(MongoDbContext context, ILogger<RepositorioPedidos> logger)
+    public RepositorioPedidos(IMongoDatabase database, ILogger<RepositorioPedidos> logger)
     {
-        _context = context;
+        _pedidos = database.GetCollection<Pedido>("pedidos");
         _logger = logger;
     }
 
@@ -20,7 +20,7 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            return _context.Pedidos.Find(p => p.Id == id).FirstOrDefault();
+            return _pedidos.Find(p => p.Id == id).FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -33,7 +33,7 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            return _context.Pedidos.Find(_ => true).ToList();
+            return _pedidos.Find(_ => true).ToList();
         }
         catch (Exception ex)
         {
@@ -46,7 +46,7 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            var result = _context.Pedidos.ReplaceOne(
+            var result = _pedidos.ReplaceOne(
                 p => p.Id == pedido.Id,
                 pedido,
                 new ReplaceOptions { IsUpsert = true });

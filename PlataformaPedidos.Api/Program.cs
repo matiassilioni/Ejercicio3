@@ -11,7 +11,13 @@ builder.Services.AddOpenApi();
 
 var connectionString = builder.Configuration.GetConnectionString("MySQL");
 
-builder.Services.AddScoped<MySqlConnection>(_ =>
+//AddScoped => crea la instancia y se la acuerda para cualquier servicio que pida este tipo
+//otra vez durante lo que dure el request. 
+
+//AddTransient => cada vez que se pida una instancia, se crea una nueva, no se acuerda de nada.
+
+//Singleton => la primera vez que se pide la instancia, se crea y se guarda PARA SIEMPRE.
+builder.Services.AddTransient<MySqlConnection>(_ =>
 {
     var connection = new MySqlConnection(connectionString);
     connection.Open();

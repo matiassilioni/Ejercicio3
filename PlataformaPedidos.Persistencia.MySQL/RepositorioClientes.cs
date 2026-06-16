@@ -8,22 +8,35 @@ namespace PlataformaPedidos.Persistencia.MySQL;
 
 public class RepositorioClientes : IRepositorioClientes
 {
-    private readonly string _connectionString;
+    private readonly MySqlConnection _connection;
     private readonly ILogger<RepositorioClientes> _logger;
 
-    public RepositorioClientes(string connectionString, ILogger<RepositorioClientes> logger)
+    public RepositorioClientes(MySqlConnection connection, ILogger<RepositorioClientes> logger)
     {
-        _connectionString = connectionString;
+        _connection = connection;
         _logger = logger;
+    }
+
+    public List<Cliente> GetAll()
+    {
+        try
+        {
+            const string sql = "SELECT Id, Nombre FROM Clientes";
+            return _connection.Query<Cliente>(sql).AsList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener todos los clientes");
+            return new List<Cliente>();
+        }
     }
 
     public Cliente GetCliente(Guid id)
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
             const string sql = "SELECT Id, Nombre FROM Clientes WHERE Id = @Id";
-            return connection.QuerySingleOrDefault<Cliente>(sql, new { Id = id });
+            return _connection.QuerySingleOrDefault<Cliente>(sql, new { Id = id });
         }
         catch (Exception ex)
         {
@@ -36,12 +49,11 @@ public class RepositorioClientes : IRepositorioClientes
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
             const string sql = @"
                 INSERT INTO Clientes (Id, Nombre)
                 VALUES (@Id, @Nombre)
                 ON DUPLICATE KEY UPDATE Nombre = @Nombre";
-            var filas = connection.Execute(sql, new { cliente.Id, cliente.Nombre });
+            var filas = _connection.Execute(sql, new { cliente.Id, cliente.Nombre });
             return filas > 0;
         }
         catch (Exception ex)

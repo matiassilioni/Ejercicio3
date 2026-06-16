@@ -8,12 +8,12 @@ namespace PlataformaPedidos.Persistencia.MySQL;
 
 public class RepositorioPedidos : IRepositorioPedidos
 {
-    private readonly string _connectionString;
+    private readonly MySqlConnection _connection;
     private readonly ILogger<RepositorioPedidos> _logger;
 
-    public RepositorioPedidos(string connectionString, ILogger<RepositorioPedidos> logger)
+    public RepositorioPedidos(MySqlConnection connection, ILogger<RepositorioPedidos> logger)
     {
-        _connectionString = connectionString;
+        _connection = connection;
         _logger = logger;
     }
 
@@ -21,14 +21,11 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
-            connection.Open();
-
-            var pedido = GetPedidoBase(connection, id);
+            var pedido = GetPedidoBase(_connection, id);
             if (pedido == null) return null;
 
-            pedido.Cliente = GetClienteDePedido(connection, id);
-            pedido.Detalles = GetLineasDePedido(connection, id);
+            pedido.Cliente = GetClienteDePedido(_connection, id);
+            pedido.Detalles = GetLineasDePedido(_connection, id);
 
             return pedido;
         }
@@ -43,27 +40,24 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
-            connection.Open();
-
             const string sqlPedidos = @"
                 SELECT Id, ClienteId, Estado, FechaCreacion, FechaConfirmacion, Total
                 FROM Pedidos";
 
-            var pedidos = connection.Query<Pedido>(sqlPedidos).AsList();
+            var pedidos = _connection.Query<Pedido>(sqlPedidos).AsList();
 
             if (pedidos.Count == 0) return pedidos;
 
             var ids = pedidos.Select(p => p.Id).ToList();
 
-            var clientes = connection.Query<Cliente>(@"
+            var clientes = _connection.Query<Cliente>(@"
                 SELECT DISTINCT c.Id, c.Nombre
                 FROM Clientes c
                 INNER JOIN Pedidos p ON p.ClienteId = c.Id
                 WHERE p.Id IN @Ids", new { Ids = ids })
                 .ToDictionary(c => c.Id);
 
-            var lineasRaw = connection.Query(@"
+            var lineasRaw = _connection.Query(@"
                 SELECT lp.PedidoId, lp.Cantidad, lp.PrecioUnitario, lp.Subtotal,
                        p.Id AS ProductoId, p.Nombre, p.Descripcion, p.Precio,
                        p.FechaModificacion, p.Disponible
@@ -109,9 +103,7 @@ public class RepositorioPedidos : IRepositorioPedidos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
-            connection.Open();
-            using var transaction = connection.BeginTransaction();
+            using var transaction = _connection.BeginTransaction();
 
             try
             {
@@ -125,7 +117,7 @@ public class RepositorioPedidos : IRepositorioPedidos
                         FechaConfirmacion = @FechaConfirmacion,
                         Total = @Total";
 
-                connection.Execute(sqlPedido, new
+                _connection.Execute(sqlPedido, new
                 {
                     pedido.Id,
                     ClienteId = pedido.Cliente?.Id,
@@ -135,7 +127,7 @@ public class RepositorioPedidos : IRepositorioPedidos
                     pedido.Total
                 }, transaction);
 
-                connection.Execute(
+                _connection.Execute(
                     "DELETE FROM LineasPedido WHERE PedidoId = @PedidoId",
                     new { PedidoId = pedido.Id },
                     transaction);
@@ -155,7 +147,7 @@ public class RepositorioPedidos : IRepositorioPedidos
                         l.Subtotal
                     });
 
-                    connection.Execute(sqlLineas, lineas, transaction);
+                    _connection.Execute(sqlLineas, lineas, transaction);
                 }
 
                 transaction.Commit();

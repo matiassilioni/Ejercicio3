@@ -12,6 +12,8 @@ public class RepositoriosMySQLTest
     private const string ConnectionString =
         "Server=localhost;Port=3307;Database=plataforma_pedidos;User Id=pedidos_user;Password=pedidos_pass;";
 
+    private static MySqlConnection CreateConnection() => new(ConnectionString);
+
     private static readonly Guid ClienteDemo1Id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static readonly Guid ClienteDemo2Id = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
     private static readonly Guid ProductoAId = Guid.Parse("c3d4e5f6-a7b8-9012-cdef-123456789012");
@@ -58,7 +60,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void GetCliente_ConIdExistente_RetornaCliente()
     {
-        var repo = new RepositorioClientes(ConnectionString, Logger<RepositorioClientes>());
+        var repo = new RepositorioClientes(CreateConnection(), Logger<RepositorioClientes>());
 
         var cliente = repo.GetCliente(ClienteDemo1Id);
 
@@ -69,7 +71,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void SaveOrUpdateCliente_NuevoCliente_CreaCliente()
     {
-        var repo = new RepositorioClientes(ConnectionString, Logger<RepositorioClientes>());
+        var repo = new RepositorioClientes(CreateConnection(), Logger<RepositorioClientes>());
         var nuevoId = Guid.NewGuid();
 
         var resultado = repo.SaveOrUpdateCliente(new Cliente { Id = nuevoId, Nombre = "Cliente Test MySQL" });
@@ -83,7 +85,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void SaveOrUpdateCliente_ClienteExistente_ActualizaCliente()
     {
-        var repo = new RepositorioClientes(ConnectionString, Logger<RepositorioClientes>());
+        var repo = new RepositorioClientes(CreateConnection(), Logger<RepositorioClientes>());
         const string nombreActualizado = "Cliente Demo 2 Actualizado";
 
         var resultado = repo.SaveOrUpdateCliente(new Cliente { Id = ClienteDemo2Id, Nombre = nombreActualizado });
@@ -101,7 +103,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void GetById_ConIdExistente_RetornaPedidoConClienteYDetalles()
     {
-        var repo = new RepositorioPedidos(ConnectionString, Logger<RepositorioPedidos>());
+        var repo = new RepositorioPedidos(CreateConnection(), Logger<RepositorioPedidos>());
 
         var pedido = repo.GetById(PedidoSeedId);
 
@@ -114,7 +116,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void GetAll_RetornaListaPedidos()
     {
-        var repo = new RepositorioPedidos(ConnectionString, Logger<RepositorioPedidos>());
+        var repo = new RepositorioPedidos(CreateConnection(), Logger<RepositorioPedidos>());
 
         var pedidos = repo.GetAll();
 
@@ -125,9 +127,9 @@ public class RepositoriosMySQLTest
     [Fact]
     public void SaveOrUpdate_NuevoPedido_CreaPedido()
     {
-        var repoCliente = new RepositorioClientes(ConnectionString, Logger<RepositorioClientes>());
-        var repoProducto = new RepositorioProductos(ConnectionString, Logger<RepositorioProductos>());
-        var repoPedido = new RepositorioPedidos(ConnectionString, Logger<RepositorioPedidos>());
+        var repoCliente = new RepositorioClientes(CreateConnection(), Logger<RepositorioClientes>());
+        var repoProducto = new RepositorioProductos(CreateConnection(), Logger<RepositorioProductos>());
+        var repoPedido = new RepositorioPedidos(CreateConnection(), Logger<RepositorioPedidos>());
 
         var cliente = repoCliente.GetCliente(ClienteDemo1Id);
         var producto = repoProducto.GetById(ProductoAId);
@@ -166,7 +168,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void GetById_ProductoExistente_RetornaProducto()
     {
-        var repo = new RepositorioProductos(ConnectionString, Logger<RepositorioProductos>());
+        var repo = new RepositorioProductos(CreateConnection(), Logger<RepositorioProductos>());
 
         var producto = repo.GetById(ProductoAId);
 
@@ -177,7 +179,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void GetAll_Productos_RetornaLista()
     {
-        var repo = new RepositorioProductos(ConnectionString, Logger<RepositorioProductos>());
+        var repo = new RepositorioProductos(CreateConnection(), Logger<RepositorioProductos>());
 
         var productos = repo.GetAll();
 
@@ -188,7 +190,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void SaveOrUpdateProducto_NuevoProducto_CreaProducto()
     {
-        var repo = new RepositorioProductos(ConnectionString, Logger<RepositorioProductos>());
+        var repo = new RepositorioProductos(CreateConnection(), Logger<RepositorioProductos>());
         var nuevoId = Guid.NewGuid();
 
         var nuevo = new Producto
@@ -212,7 +214,7 @@ public class RepositoriosMySQLTest
     [Fact]
     public void SaveOrUpdateProducto_ProductoExistente_ActualizaProducto()
     {
-        var repo = new RepositorioProductos(ConnectionString, Logger<RepositorioProductos>());
+        var repo = new RepositorioProductos(CreateConnection(), Logger<RepositorioProductos>());
         var productoActualizado = new Producto
         {
             Id = ProductoBId,

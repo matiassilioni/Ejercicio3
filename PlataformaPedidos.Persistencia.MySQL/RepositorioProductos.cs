@@ -8,12 +8,12 @@ namespace PlataformaPedidos.Persistencia.MySQL;
 
 public class RepositorioProductos : IRepositorioProductos
 {
-    private readonly string _connectionString;
+    private readonly MySqlConnection _connection;
     private readonly ILogger<RepositorioProductos> _logger;
 
-    public RepositorioProductos(string connectionString, ILogger<RepositorioProductos> logger)
+    public RepositorioProductos(MySqlConnection connection, ILogger<RepositorioProductos> logger)
     {
-        _connectionString = connectionString;
+        _connection = connection;
         _logger = logger;
     }
 
@@ -21,11 +21,10 @@ public class RepositorioProductos : IRepositorioProductos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
             const string sql = @"
                 SELECT Id, Nombre, Descripcion, Precio, FechaModificacion, Disponible
                 FROM Productos WHERE Id = @Id";
-            return connection.QuerySingleOrDefault<Producto>(sql, new { Id = id });
+            return _connection.QuerySingleOrDefault<Producto>(sql, new { Id = id });
         }
         catch (Exception ex)
         {
@@ -38,11 +37,10 @@ public class RepositorioProductos : IRepositorioProductos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
             const string sql = @"
                 SELECT Id, Nombre, Descripcion, Precio, FechaModificacion, Disponible
                 FROM Productos";
-            return connection.Query<Producto>(sql).AsList();
+            return _connection.Query<Producto>(sql).AsList();
         }
         catch (Exception ex)
         {
@@ -55,7 +53,6 @@ public class RepositorioProductos : IRepositorioProductos
     {
         try
         {
-            using var connection = new MySqlConnection(_connectionString);
             const string sql = @"
                 INSERT INTO Productos (Id, Nombre, Descripcion, Precio, FechaModificacion, Disponible)
                 VALUES (@Id, @Nombre, @Descripcion, @Precio, @FechaModificacion, @Disponible)
@@ -65,7 +62,7 @@ public class RepositorioProductos : IRepositorioProductos
                     Precio = @Precio,
                     FechaModificacion = @FechaModificacion,
                     Disponible = @Disponible";
-            var filas = connection.Execute(sql, new
+            var filas = _connection.Execute(sql, new
             {
                 producto.Id,
                 producto.Nombre,
