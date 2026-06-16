@@ -1,4 +1,5 @@
-﻿using PlataformaPedidos.Dominio.Contratos;
+﻿using System.IO.MemoryMappedFiles;
+using PlataformaPedidos.Dominio.Contratos;
 using PlataformaPedidos.Dominio.Contratos.Persistencia;
 using PlataformaPedidos.Dominio.Enumeraciones;
 using PlataformaPedidos.Dominio.Modelos;
@@ -7,11 +8,16 @@ namespace PlataformaPedidos.Servicios;
 
 public class ServicioPedidos : IServicioPedidos
 {
-    private IRepositorioPedidos _repositorioPedidos;
-    
-    public ServicioPedidos(IRepositorioPedidos repositorioPedidos)
+    private readonly IRepositorioPedidos _repositorioPedidos;
+    private readonly IRepositorioClientes _repositorioClientes;
+    private readonly IRepositorioProductos _repositorioProductos;
+
+    public ServicioPedidos(IRepositorioPedidos repositorioPedidos, IRepositorioClientes  repositorioClientes
+        , IRepositorioProductos repositorioProductos)
     {
         _repositorioPedidos = repositorioPedidos;
+        _repositorioClientes = repositorioClientes;
+        _repositorioProductos = repositorioProductos;
     }
     
     public bool CrearPedido(Pedido pedido)
@@ -26,9 +32,31 @@ public class ServicioPedidos : IServicioPedidos
             return false;
         }
 
+        Cliente clienteDeLaBase = _repositorioClientes.GetCliente(pedido.Cliente.Id);
+
+        if (clienteDeLaBase == null)
+        {
+            return false;
+        }
+        
+        pedido.Cliente = clienteDeLaBase;
+        
         if (pedido.Detalles == null || pedido.Detalles.Count == 0)
         {
             return false;
+        }
+
+        foreach (LineaPedido pedidoDetalle in pedido.Detalles)
+        {
+            Producto productoDeLaBase = _repositorioProductos.GetById(pedidoDetalle.Producto.Id);
+            if (productoDeLaBase == null)
+            {
+                return false;
+            }
+            
+            pedidoDetalle.Producto = productoDeLaBase;
+            pedidoDetalle.PrecioUnitario = productoDeLaBase.Precio;
+            pedidoDetalle.Subtotal = pedidoDetalle.PrecioUnitario * pedidoDetalle.Cantidad;
         }
         
         pedido.Id = Guid.NewGuid();
@@ -36,16 +64,8 @@ public class ServicioPedidos : IServicioPedidos
         pedido.FechaConfirmacion = null;
         pedido.FechaCreacion = DateTime.UtcNow;
         
-        decimal total = 0;
-        foreach (LineaPedido linea in pedido.Detalles)
-        {
-            total = total + linea.Cantidad * linea.PrecioUnitario;
-        } 
-        
-        pedido.Total = total;
-        
         //linq
-        pedido.Total = pedido.Detalles.Sum(lineaPedido => lineaPedido.Cantidad * lineaPedido.PrecioUnitario);
+        pedido.Total = pedido.Detalles.Sum(lineaPedido => lineaPedido.Subtotal);
         
         
         bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
