@@ -30,7 +30,8 @@ public class ServicioPedidos : IServicioPedidos
         {
             return false;
         }
-
+        
+        pedido.Id = Guid.NewGuid();
         pedido.Estado = EstadoPedido.Pendiente;
         pedido.FechaConfirmacion = null;
         pedido.FechaCreacion = DateTime.UtcNow;
@@ -54,10 +55,27 @@ public class ServicioPedidos : IServicioPedidos
 
     public bool ConfirmarPedido(Guid pedidoId)
     {
-        throw new NotImplementedException();
-    }
+        Pedido pedido = _repositorioPedidos.GetById(pedidoId);
 
-    public bool CancelarPedido(Guid pedidoId)
+        if (pedido == null)
+        {
+            return false;
+        }
+
+        if (pedido.Estado != EstadoPedido.Pendiente)
+        {
+            return false;
+        }
+
+        pedido.Estado = EstadoPedido.Confirmado;
+        pedido.FechaConfirmacion = DateTime.UtcNow;
+
+        bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
+        
+        return graboBien;
+        //Boca Jr 
+  }
+     public bool CancelarPedido(Guid pedidoId)
     {
         
         Pedido pedido = _repositorioPedidos.GetById(pedidoId);
