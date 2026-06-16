@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using PlataformaPedidos.Dominio.Contratos.Persistencia;
+using PlataformaPedidos.Dominio.Enumeraciones;
 using PlataformaPedidos.Dominio.Modelos;
 
 namespace PlataformaPedidos.Persistencia.MySQL;
@@ -44,11 +45,21 @@ public class RepositorioPedidos : IRepositorioPedidos
                 SELECT Id, ClienteId, Estado, FechaCreacion, FechaConfirmacion, Total
                 FROM Pedidos";
 
-            var pedidos = _connection.Query<Pedido>(sqlPedidos).AsList();
+            var pedidosRaw = _connection.Query<(Guid Id, Guid ClienteId, EstadoPedido Estado, DateTime FechaCreacion, DateTime? FechaConfirmacion, decimal Total)>(sqlPedidos).ToList();
 
-            if (pedidos.Count == 0) return pedidos;
+            if (pedidosRaw.Count == 0) return new List<Pedido>();
 
-            var ids = pedidos.Select(p => p.Id).ToList();
+            var ids = pedidosRaw.Select(r => r.Id).ToList();
+            var clienteIdPorPedido = pedidosRaw.ToDictionary(r => r.Id, r => r.ClienteId);
+
+            var pedidos = pedidosRaw.Select(r => new Pedido
+            {
+                Id = r.Id,
+                Estado = r.Estado,
+                FechaCreacion = r.FechaCreacion,
+                FechaConfirmacion = r.FechaConfirmacion,
+                Total = r.Total
+            }).ToList();
 
             var clientes = _connection.Query<Cliente>(@"
                 SELECT DISTINCT c.Id, c.Nombre
@@ -83,7 +94,8 @@ public class RepositorioPedidos : IRepositorioPedidos
 
             foreach (var pedido in pedidos)
             {
-                if (clientes.TryGetValue(pedido.Id, out var cliente))
+                if (clienteIdPorPedido.TryGetValue(pedido.Id, out var clienteId)
+                    && clientes.TryGetValue(clienteId, out var cliente))
                     pedido.Cliente = cliente;
 
                 if (lineasRaw.TryGetValue(pedido.Id, out var detalles))
