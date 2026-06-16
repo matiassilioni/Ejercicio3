@@ -16,6 +16,19 @@ public class RepositorioClientes : IRepositorioClientes
         _logger = logger;
     }
 
+    public List<Cliente> GetAll()
+    {
+        try
+        {
+            return _context.Clientes.Find(_ => true).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener todos los clientes");
+            throw;
+        }
+    }
+
     public Cliente GetCliente(Guid id)
     {
         try

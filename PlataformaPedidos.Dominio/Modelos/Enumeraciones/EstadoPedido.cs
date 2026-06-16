@@ -8,15 +8,15 @@ public enum EstadoPedido
     /// <summary>
     /// El pedido ha sido creado pero aún no confirmado.
     /// </summary>
-    Pendiente,
+    Pendiente = 0,
 
     /// <summary>
     /// El pedido ha sido confirmado y está en procesamiento.
     /// </summary>
-    Confirmado,
+    Confirmado = 1,
 
     /// <summary>
     /// El pedido ha sido cancelado por el cliente o el sistema.
     /// </summary>
-    Cancelado
+    Cancelado = 2
 }

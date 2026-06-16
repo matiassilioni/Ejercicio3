@@ -6,4 +6,5 @@
   <Project Path="PlataformaPedidos.Persistencia.MySQL/PlataformaPedidos.Persistencia.MySQL.csproj" />
   <Project Path="PlataformaPedidos.Persistencia.mongodb/PlataformaPedidos.Persistencia.mongodb.csproj" />
   <Project Path="PlataformaPedidos.Persistencia.Tests/PlataformaPedidos.Persistencia.Tests.csproj" />
+  <Project Path="PlataformaPedidos.Api/PlataformaPedidos.Api.csproj" />
 </Solution>

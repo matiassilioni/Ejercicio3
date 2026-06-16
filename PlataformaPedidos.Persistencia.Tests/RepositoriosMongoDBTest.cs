@@ -13,6 +13,7 @@ public class RepositoriosMongoDBTest
     private const string DatabaseName = "plataforma_pedidos";
 
     private static MongoDbContext CreateContext() => new(ConnectionString, DatabaseName);
+    private static IMongoDatabase CreateDatabase() => new MongoClient(ConnectionString).GetDatabase(DatabaseName);
 
     private static readonly Guid ClienteDemo1Id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     private static readonly Guid ClienteDemo2Id = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
@@ -122,7 +123,7 @@ public class RepositoriosMongoDBTest
     public void GetById_ConIdExistente_RetornaPedidoConClienteYDetalles()
     {
         var context = CreateContext();
-        var repo = new RepositorioPedidos(context, NullLogger<RepositorioPedidos>.Instance);
+        var repo = new RepositorioPedidos(CreateDatabase(), NullLogger<RepositorioPedidos>.Instance);
 
         var pedido = repo.GetById(PedidoSeedId);
 
@@ -136,7 +137,7 @@ public class RepositoriosMongoDBTest
     public void GetAll_RetornaListaPedidos()
     {
         var context = CreateContext();
-        var repo = new RepositorioPedidos(context, NullLogger<RepositorioPedidos>.Instance);
+        var repo = new RepositorioPedidos(CreateDatabase(), NullLogger<RepositorioPedidos>.Instance);
 
         var pedidos = repo.GetAll();
 
@@ -150,7 +151,7 @@ public class RepositoriosMongoDBTest
         var context = CreateContext();
         var repoCliente = new RepositorioClientes(context, NullLogger<RepositorioClientes>.Instance);
         var repoProducto = new RepositorioProductos(context, NullLogger<RepositorioProductos>.Instance);
-        var repoPedido = new RepositorioPedidos(context, NullLogger<RepositorioPedidos>.Instance);
+        var repoPedido = new RepositorioPedidos(CreateDatabase(), NullLogger<RepositorioPedidos>.Instance);
 
         var cliente = repoCliente.GetCliente(ClienteDemo1Id);
         var producto = repoProducto.GetById(ProductoAId);

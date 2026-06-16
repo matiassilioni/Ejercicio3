@@ -17,6 +17,21 @@ public class RepositorioClientes : IRepositorioClientes
         _logger = logger;
     }
 
+    public List<Cliente> GetAll()
+    {
+        try
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            const string sql = "SELECT Id, Nombre FROM Clientes";
+            return connection.Query<Cliente>(sql).AsList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener todos los clientes");
+            return new List<Cliente>();
+        }
+    }
+
     public Cliente GetCliente(Guid id)
     {
         try
