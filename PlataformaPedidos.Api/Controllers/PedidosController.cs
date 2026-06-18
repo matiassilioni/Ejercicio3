@@ -27,8 +27,8 @@ public class PedidosController : ControllerBase
     [HttpPost]
     public IActionResult CrearPedido([FromBody] Pedido pedido)
     {
-        var resultado = _servicioPedidos.CrearPedido(pedido);
-        if (!resultado)
+        Guid? resultado = _servicioPedidos.CrearPedido(pedido);
+        if (resultado == null)
         {
             return BadRequest("No se pudo crear el pedido. Verifique los datos ingresados.");
         }

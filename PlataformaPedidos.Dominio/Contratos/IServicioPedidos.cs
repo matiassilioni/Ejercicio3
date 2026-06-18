@@ -4,7 +4,7 @@ namespace PlataformaPedidos.Dominio.Contratos;
 
 public interface IServicioPedidos
 {
-    public bool CrearPedido(Pedido pedido);
+    public Guid? CrearPedido(Pedido pedido);
     
     public bool ConfirmarPedido(Guid pedidoId);
     

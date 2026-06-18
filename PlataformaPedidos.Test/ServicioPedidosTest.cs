@@ -1,4 +1,5 @@
 ﻿using NSubstitute;
+using PlataformaPedidos.Dominio.Contratos;
 using PlataformaPedidos.Dominio.Contratos.Persistencia;
 using PlataformaPedidos.Dominio.Enumeraciones;
 using PlataformaPedidos.Dominio.Modelos;
@@ -8,12 +9,22 @@ namespace PlataformaPedidos.Test;
 
 public class ServicioPedidosTest
 {
+    private static (IRepositorioPedidos, IRepositorioClientes, IRepositorioProductos) CrearMocks()
+    {
+        return (
+            Substitute.For<IRepositorioPedidos>(),
+            Substitute.For<IRepositorioClientes>(),
+            Substitute.For<IRepositorioProductos>()
+        );
+    }
+
     [Fact]
     public void Test1()
     {
-        IRepositorioPedidos repoMock = NSubstitute.Substitute.For<IRepositorioPedidos>();
+        var (repoMock, _, _) = CrearMocks();
         
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
     }
 
     [Fact]
@@ -40,7 +51,8 @@ public class ServicioPedidosTest
         repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(true);
 
         // Inyectamos el mock en tu servicio real
-        var servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
 
         // 2. ACT (Ejecutar el método de tu servicio que queremos probar)
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
@@ -58,67 +70,55 @@ public class ServicioPedidosTest
     public void ConfirmarPedidoTestIdInexistente()
     {
         var idDePrueba = Guid.NewGuid();
-        // Creamos el mock/substituto del repositorio
         IRepositorioPedidos repoMock = NSubstitute.Substitute.For<IRepositorioPedidos>();
-    
-        // CONFIGURACIÓN CLAVE: "Cuando llamen a GetById con el id de prueba, devolvé el pedidoFake"
         repoMock.GetById(idDePrueba).Returns((Pedido)null);
         
-        // Inyectamos el mock en tu servicio real
-        var servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
 
-        // 2. ACT (Ejecutar el método de tu servicio que queremos probar)
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
         
         Assert.False(resultado);
     }
+    
     [Fact]
-        public void ConfirmarPedido_CuandoElPedidoNoEstaPendiente_DebeRetornarFalseYNoGuardar()
+    public void ConfirmarPedido_CuandoElPedidoNoEstaPendiente_DebeRetornarFalseYNoGuardar()
+    {
+        var idDePrueba = Guid.NewGuid();
+        var pedidoFake = new Pedido
         {
-            // 1. ARRANGE
-            var idDePrueba = Guid.NewGuid();
-    
-            // Creamos un pedido que ya fue procesado (por ejemplo, ya está Confirmado o Cancelado)
-            var pedidoFake = new Pedido
-            {
-                Id = idDePrueba,
-                Estado = EstadoPedido.Confirmado, // No está Pendiente
-                FechaConfirmacion = DateTime.UtcNow.AddDays(-1)
-            };
-    
-            IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-            repoMock.GetById(idDePrueba).Returns(pedidoFake);
-            
-            var servicio = new ServicioPedidos(repoMock);
-    
-            // 2. ACT
-            bool resultado = servicio.ConfirmarPedido(idDePrueba);
-    
-            // 3. ASSERT
-            Assert.False(resultado);
-            // Verificación clave: Como el estado no era Pendiente, el método debió cortar antes y NO guardar
-            repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
-        }
+            Id = idDePrueba,
+            Estado = EstadoPedido.Confirmado,
+            FechaConfirmacion = DateTime.UtcNow.AddDays(-1)
+        };
+
+        IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
+        repoMock.GetById(idDePrueba).Returns(pedidoFake);
+        
+        var (_, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        bool resultado = servicio.ConfirmarPedido(idDePrueba);
+
+        Assert.False(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
     
     [Fact]    
     public void ConfirmarPedido_CuandoElRepositorioFallaAlGuardar_DebeRetornarFalse()
     {
-        // 1. ARRANGE
         var idDePrueba = Guid.NewGuid();
         var pedidoFake = new Pedido { Id = idDePrueba, Estado = EstadoPedido.Pendiente };
 
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
         repoMock.GetById(idDePrueba).Returns(pedidoFake);
-    
-        // CONFIGURACIÓN CLAVE: El pedido es válido, pero el guardado falla (devuelve false)
         repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(false);
 
-        var servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
 
-        // 2. ACT
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
 
-        // 3. ASSERT
         Assert.False(resultado);
     }
 
@@ -126,7 +126,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoPreviamenteCanceladoTest()
     {
         IRepositorioPedidos repoMock = NSubstitute.Substitute.For<IRepositorioPedidos>();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
         
         Guid pedidoId = Guid.NewGuid();
 
@@ -142,14 +143,14 @@ public class ServicioPedidosTest
         
         repoMock.Received(1).GetById(pedidoId);
         repoMock.Received(0).SaveOrUpdate(pedido);
-        
     }
 
     [Fact]
     public void CancelarPedidoPendienteTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -168,12 +169,12 @@ public class ServicioPedidosTest
         repoMock.Received(1).SaveOrUpdate(pedido);
     }
     
-    
     [Fact]
     public void CancelarPedidoPendienteFallaGrabarTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -196,7 +197,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoConfirmadoTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -217,7 +219,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoinexistenteTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock);
+        var (_, clientesMock, productosMock) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -230,4 +233,167 @@ public class ServicioPedidosTest
         repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
     }
 
+    [Fact]
+    public void CrearPedido_CuandoTodoEsValido_DebeRetornarId()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
+        var productoExistente = new Producto { Id = Guid.NewGuid(), Nombre = "Prod1", Precio = 100m };
+        var pedido = new Pedido
+        {
+            Cliente = new Cliente { Id = clienteExistente.Id },
+            Detalles = new List<LineaPedido>
+            {
+                new LineaPedido { Producto = new Producto { Id = productoExistente.Id }, Cantidad = 2 }
+            }
+        };
+
+        clientesMock.GetCliente(clienteExistente.Id).Returns(clienteExistente);
+        productosMock.GetById(productoExistente.Id).Returns(productoExistente);
+        repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(true);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.NotNull(resultado);
+        Assert.NotEqual(Guid.Empty, resultado.Value);
+        Assert.Equal(EstadoPedido.Pendiente, pedido.Estado);
+        Assert.Equal(200m, pedido.Total);
+        repoMock.Received(1).SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoPedidoEsNull_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        Guid? resultado = servicio.CrearPedido(null);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoClienteEsNull_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var pedido = new Pedido { Cliente = null };
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoClienteNoExiste_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var pedido = new Pedido { Cliente = new Cliente { Id = Guid.NewGuid() } };
+        clientesMock.GetCliente(Arg.Any<Guid>()).Returns((Cliente)null);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoNoHayDetalles_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
+        var pedido = new Pedido
+        {
+            Cliente = new Cliente { Id = clienteExistente.Id },
+            Detalles = null
+        };
+
+        clientesMock.GetCliente(clienteExistente.Id).Returns(clienteExistente);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoProductoNoExiste_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
+        var pedido = new Pedido
+        {
+            Cliente = new Cliente { Id = clienteExistente.Id },
+            Detalles = new List<LineaPedido>
+            {
+                new LineaPedido { Producto = new Producto { Id = Guid.NewGuid() }, Cantidad = 1 }
+            }
+        };
+
+        clientesMock.GetCliente(clienteExistente.Id).Returns(clienteExistente);
+        productosMock.GetById(Arg.Any<Guid>()).Returns((Producto)null);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoRepositorioFalla_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
+        var productoExistente = new Producto { Id = Guid.NewGuid(), Nombre = "Prod1", Precio = 50m };
+        var pedido = new Pedido
+        {
+            Cliente = new Cliente { Id = clienteExistente.Id },
+            Detalles = new List<LineaPedido>
+            {
+                new LineaPedido { Producto = new Producto { Id = productoExistente.Id }, Cantidad = 3 }
+            }
+        };
+
+        clientesMock.GetCliente(clienteExistente.Id).Returns(clienteExistente);
+        productosMock.GetById(productoExistente.Id).Returns(productoExistente);
+        repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(false);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.Received(1).SaveOrUpdate(Arg.Any<Pedido>());
+    }
+
+    [Fact]
+    public void CrearPedido_CuandoDetallesVacio_DebeRetornarNull()
+    {
+        var (repoMock, clientesMock, productosMock) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+
+        var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
+        var pedido = new Pedido
+        {
+            Cliente = new Cliente { Id = clienteExistente.Id },
+            Detalles = new List<LineaPedido>()
+        };
+
+        clientesMock.GetCliente(clienteExistente.Id).Returns(clienteExistente);
+
+        Guid? resultado = servicio.CrearPedido(pedido);
+
+        Assert.Null(resultado);
+        repoMock.DidNotReceive().SaveOrUpdate(Arg.Any<Pedido>());
+    }
 }   
