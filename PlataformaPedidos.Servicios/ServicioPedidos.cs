@@ -20,39 +20,24 @@ public class ServicioPedidos : IServicioPedidos
         _repositorioProductos = repositorioProductos;
     }
     
-    public bool CrearPedido(Pedido pedido)
+    public Guid? CrearPedido(Pedido pedido)
     {
-        if (pedido == null)
-        {
-            return false;
-        }
+        if (pedido == null) return null;
 
-        if (pedido.Cliente == null)
-        {
-            return false;
-        }
+        if (pedido.Cliente == null) return null;
 
         Cliente clienteDeLaBase = _repositorioClientes.GetCliente(pedido.Cliente.Id);
 
-        if (clienteDeLaBase == null)
-        {
-            return false;
-        }
+        if (clienteDeLaBase == null) return null;
         
         pedido.Cliente = clienteDeLaBase;
         
-        if (pedido.Detalles == null || pedido.Detalles.Count == 0)
-        {
-            return false;
-        }
+        if (pedido.Detalles == null || pedido.Detalles.Count == 0) return null;
 
         foreach (LineaPedido pedidoDetalle in pedido.Detalles)
         {
             Producto productoDeLaBase = _repositorioProductos.GetById(pedidoDetalle.Producto.Id);
-            if (productoDeLaBase == null)
-            {
-                return false;
-            }
+            if (productoDeLaBase == null) return null;
             
             pedidoDetalle.Producto = productoDeLaBase;
             pedidoDetalle.PrecioUnitario = productoDeLaBase.Precio;
@@ -64,13 +49,11 @@ public class ServicioPedidos : IServicioPedidos
         pedido.FechaConfirmacion = null;
         pedido.FechaCreacion = DateTime.UtcNow;
         
-        //linq
         pedido.Total = pedido.Detalles.Sum(lineaPedido => lineaPedido.Subtotal);
-        
         
         bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
         
-        return graboBien;
+        return graboBien ? pedido.Id : null;
     }
 
     public bool ConfirmarPedido(Guid pedidoId)

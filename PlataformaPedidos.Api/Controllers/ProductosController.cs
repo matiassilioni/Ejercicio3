@@ -27,7 +27,7 @@ public class ProductosController : ControllerBase
     [HttpPost]
     public IActionResult CrearProducto([FromBody] Producto producto)
     {
-        var resultado = _servicioProducto.CrearProducto(producto);
+        Producto? resultado = _servicioProducto.CrearProducto(producto);
         if (resultado == null)
         {
             return BadRequest("No se pudo crear el producto. Verifique los datos ingresados.");

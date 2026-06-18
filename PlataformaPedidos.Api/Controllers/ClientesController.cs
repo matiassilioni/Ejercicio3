@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PlataformaPedidos.Dominio.Contratos;
 using PlataformaPedidos.Dominio.Contratos.Persistencia;
+using PlataformaPedidos.Dominio.Modelos;
 
 namespace PlataformaPedidos.Api.Controllers;
 
@@ -26,7 +27,7 @@ public class ClientesController : ControllerBase
     [HttpPost]
     public IActionResult CrearCliente([FromBody] string nombre)
     {
-        var cliente = _servicioCliente.CrearCliente(nombre);
+        Cliente? cliente = _servicioCliente.CrearCliente(nombre);
         if (cliente == null)
         {
             return BadRequest("No se pudo crear el cliente. Verifique que el nombre no esté vacío.");
