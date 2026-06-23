@@ -9,22 +9,23 @@ namespace PlataformaPedidos.Test;
 
 public class ServicioPedidosTest
 {
-    private static (IRepositorioPedidos, IRepositorioClientes, IRepositorioProductos) CrearMocks()
+    private static (IRepositorioPedidos, IRepositorioClientes, IRepositorioProductos, IServicioNotificacion) CrearMocks()
     {
         return (
             Substitute.For<IRepositorioPedidos>(),
             Substitute.For<IRepositorioClientes>(),
-            Substitute.For<IRepositorioProductos>()
+            Substitute.For<IRepositorioProductos>(),
+            Substitute.For<IServicioNotificacion>()
         );
     }
 
     [Fact]
     public void Test1()
     {
-        var (repoMock, _, _) = CrearMocks();
+        var (repoMock, _, _, _) = CrearMocks();
         
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
     }
 
     [Fact]
@@ -51,8 +52,8 @@ public class ServicioPedidosTest
         repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(true);
 
         // Inyectamos el mock en tu servicio real
-        var (_, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         // 2. ACT (Ejecutar el método de tu servicio que queremos probar)
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
@@ -73,8 +74,8 @@ public class ServicioPedidosTest
         IRepositorioPedidos repoMock = NSubstitute.Substitute.For<IRepositorioPedidos>();
         repoMock.GetById(idDePrueba).Returns((Pedido)null);
         
-        var (_, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
         
@@ -95,8 +96,8 @@ public class ServicioPedidosTest
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
         repoMock.GetById(idDePrueba).Returns(pedidoFake);
         
-        var (_, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
 
@@ -114,8 +115,8 @@ public class ServicioPedidosTest
         repoMock.GetById(idDePrueba).Returns(pedidoFake);
         repoMock.SaveOrUpdate(Arg.Any<Pedido>()).Returns(false);
 
-        var (_, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         bool resultado = servicio.ConfirmarPedido(idDePrueba);
 
@@ -126,8 +127,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoPreviamenteCanceladoTest()
     {
         IRepositorioPedidos repoMock = NSubstitute.Substitute.For<IRepositorioPedidos>();
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
         
         Guid pedidoId = Guid.NewGuid();
 
@@ -149,8 +150,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoPendienteTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -173,8 +174,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoPendienteFallaGrabarTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -197,8 +198,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoConfirmadoTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -219,8 +220,8 @@ public class ServicioPedidosTest
     public void CancelarPedidoinexistenteTest()
     {
         IRepositorioPedidos repoMock = Substitute.For<IRepositorioPedidos>();
-        var (_, clientesMock, productosMock) = CrearMocks();
-        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (_, clientesMock, productosMock, _) = CrearMocks();
+        ServicioPedidos servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
         
         Guid pedidoId = Guid.NewGuid();
         
@@ -236,8 +237,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoTodoEsValido_DebeRetornarId()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
         var productoExistente = new Producto { Id = Guid.NewGuid(), Nombre = "Prod1", Precio = 100m };
@@ -266,8 +267,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoPedidoEsNull_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         Guid? resultado = servicio.CrearPedido(null);
 
@@ -278,8 +279,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoClienteEsNull_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var pedido = new Pedido { Cliente = null };
         Guid? resultado = servicio.CrearPedido(pedido);
@@ -291,8 +292,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoClienteNoExiste_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var pedido = new Pedido { Cliente = new Cliente { Id = Guid.NewGuid() } };
         clientesMock.GetCliente(Arg.Any<Guid>()).Returns((Cliente)null);
@@ -306,8 +307,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoNoHayDetalles_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
         var pedido = new Pedido
@@ -327,8 +328,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoProductoNoExiste_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
         var pedido = new Pedido
@@ -352,8 +353,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoRepositorioFalla_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
         var productoExistente = new Producto { Id = Guid.NewGuid(), Nombre = "Prod1", Precio = 50m };
@@ -379,8 +380,8 @@ public class ServicioPedidosTest
     [Fact]
     public void CrearPedido_CuandoDetallesVacio_DebeRetornarNull()
     {
-        var (repoMock, clientesMock, productosMock) = CrearMocks();
-        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock);
+        var (repoMock, clientesMock, productosMock, _) = CrearMocks();
+        var servicio = new ServicioPedidos(repoMock, clientesMock, productosMock, Substitute.For<IServicioNotificacion>());
 
         var clienteExistente = new Cliente { Id = Guid.NewGuid(), Nombre = "Test" };
         var pedido = new Pedido

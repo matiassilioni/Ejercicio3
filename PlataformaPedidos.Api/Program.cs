@@ -36,6 +36,7 @@ builder.Services.AddScoped<IRepositorioPedidos>(sp =>
 builder.Services.AddScoped<IServicioCliente, ServicioCliente>();
 builder.Services.AddScoped<IServicioProducto, ServicioProducto>();
 builder.Services.AddScoped<IServicioPedidos, ServicioPedidos>();
+builder.Services.AddScoped<IServicioNotificacion, ServicioNotificacion>();
 
 var app = builder.Build();
 

@@ -11,13 +11,15 @@ public class ServicioPedidos : IServicioPedidos
     private readonly IRepositorioPedidos _repositorioPedidos;
     private readonly IRepositorioClientes _repositorioClientes;
     private readonly IRepositorioProductos _repositorioProductos;
+    private readonly IServicioNotificacion _servicioNotificacion;
 
     public ServicioPedidos(IRepositorioPedidos repositorioPedidos, IRepositorioClientes  repositorioClientes
-        , IRepositorioProductos repositorioProductos)
+        , IRepositorioProductos repositorioProductos, IServicioNotificacion servicioNotificacion)
     {
         _repositorioPedidos = repositorioPedidos;
         _repositorioClientes = repositorioClientes;
         _repositorioProductos = repositorioProductos;
+        _servicioNotificacion = servicioNotificacion;
     }
     
     public Guid? CrearPedido(Pedido pedido)
@@ -74,9 +76,13 @@ public class ServicioPedidos : IServicioPedidos
         pedido.FechaConfirmacion = DateTime.UtcNow;
 
         bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
-        
+
+        if (graboBien)
+        {
+            _servicioNotificacion.Notificar();
+        }
+
         return graboBien;
-        //Boca Jr 
   }
      public bool CancelarPedido(Guid pedidoId)
     {
@@ -95,7 +101,14 @@ public class ServicioPedidos : IServicioPedidos
         if (pedido.Estado == EstadoPedido.Pendiente)
         {
             pedido.Estado = EstadoPedido.Cancelado;
-            return _repositorioPedidos.SaveOrUpdate(pedido);
+            bool graboBien = _repositorioPedidos.SaveOrUpdate(pedido);
+
+            if (graboBien)
+            {
+                _servicioNotificacion.Notificar();
+            }
+
+            return graboBien;
         }
 
         return false;
