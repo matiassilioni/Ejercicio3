@@ -1,6 +1,6 @@
 # Docker Compose - Bases de Datos PlataformaPedidos
 
-Este proyecto contiene la configuración de Docker Compose para levantar las bases de datos que utiliza la aplicación **PlataformaPedidos**: MySQL, PostgreSQL y MongoDB.
+Este proyecto contiene la configuración de Docker Compose para levantar las bases de datos y servicios que utiliza la aplicación **PlataformaPedidos**: MySQL, PostgreSQL, MongoDB y el emulador de Azure Storage (Azurite).
 
 ---
 
@@ -41,7 +41,7 @@ Este comando descarga las imágenes (la primera vez puede tardar unos minutos) y
 docker compose ps
 ```
 
-Deberías ver los tres servicios con estado **"Up"** (en ejecución).
+Deberías ver los cuatro servicios con estado **"Up"** (en ejecución).
 
 También puedes ver los logs con:
 
@@ -57,11 +57,14 @@ Presiona `Ctrl + C` para salir de los logs.
 
 Cada base de datos queda disponible en los siguientes puertos:
 
-| Base de Datos | Puerto (host) | Puerto (contenedor) | Usuario     | Contraseña     | Base de Datos       |
+| Servicio      | Puerto (host) | Puerto (contenedor) | Usuario     | Contraseña     | Base de Datos       |
 |---------------|---------------|---------------------|-------------|----------------|---------------------|
 | MySQL         | `3307`        | `3306`              | `pedidos_user` | `pedidos_pass` | `plataforma_pedidos` |
 | PostgreSQL    | `5433`        | `5432`              | `pedidos_user` | `pedidos_pass` | `plataforma_pedidos` |
 | MongoDB       | `27018`       | `27017`             | `pedidos_user` | `pedidos_pass` | `plataforma_pedidos` |
+| Azurite (Blob)  | `10000`    | `10000`             | -              | -              | -                   |
+| Azurite (Queue) | `10001`    | `10001`             | -              | -              | -                   |
+| Azurite (Table) | `10002`    | `10002`             | -              | -              | -                   |
 
 > **Nota:** Se usan puertos distintos a los default (`3307` en vez de `3306`, `5433` en vez de `5432`, `27018` en vez de `27017`) para evitar conflictos si ya tienes esos servicios instalados en tu máquina.
 
@@ -80,6 +83,11 @@ Host=localhost;Port=5433;Database=plataforma_pedidos;Username=pedidos_user;Passw
 **MongoDB:**
 ```
 mongodb://pedidos_user:pedidos_pass@localhost:27018/plataforma_pedidos
+```
+
+**Azurite (Azure Storage Emulator):**
+```
+DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;
 ```
 
 ---
@@ -117,6 +125,21 @@ Luego vuelve a levantar con `docker compose up -d`.
 
 ## Notas importantes
 
-- Los datos persisten entre reinicios gracias a los **volúmenes** de Docker (`mysql_data`, `postgres_data`, `mongo_data`).
+- Los datos persisten entre reinicios gracias a los **volúmenes** de Docker (`mysql_data`, `postgres_data`, `mongo_data`, `azurite_data`).
 - Si cambias los scripts de inicialización (`init.sql` / `init.js`), deberás borrar los volúmenes (`docker compose down -v`) y volver a levantar para que se ejecuten de nuevo.
 - La primera vez que ejecutes `docker compose up` se descargarán las imágenes de Docker Hub. Esto puede demorar dependiendo de tu conexión a internet.
+- Para usar Azurite desde la aplicación, puedes configurar la conexión con `"UseDevelopmentStorage=true"` si corres localmente, o usar la connection string completa que aparece arriba en la sección de conexión.
+
+## Azurite - Emulador de Azure Storage
+
+Azurite es un emulador gratuito y open-source de Azure Storage (Blob, Queue y Table) para entornos de desarrollo local. Está incluido en el docker-compose para permitir el desarrollo y pruebas de funcionalidades que dependen de Azure Storage sin necesidad de una cuenta real de Azure.
+
+### Servicios expuestos
+
+| Servicio | Puerto | Descripción                     |
+|----------|--------|---------------------------------|
+| Blob     | 10000  | Almacenamiento de archivos      |
+| Queue    | 10001  | Colas de mensajería             |
+| Table    | 10002  | Almacenamiento NoSQL tabular    |
+
+> **Nota:** Azurite corre en modo `--loose`, lo que permite usar cualquier nombre de cuenta y clave de acceso sin validación estricta, ideal para desarrollo.
