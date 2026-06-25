@@ -9,7 +9,7 @@ public class ServicioNotificacionTest
     {
         var servicio = new ServicioNotificacion();
 
-        bool resultado = servicio.Notificar();
+        bool resultado = servicio.Notificar("test:Confirmado");
 
         Assert.True(resultado);
     }

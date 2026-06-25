@@ -11,9 +11,9 @@ const DURATION = __ENV.DURATION || '2m';
 
 export const options = {
   stages: [
-    { duration: '30s', target: TARGET },
-    { duration: DURATION, target: TARGET },
-    { duration: '30s', target: 0 },
+    { duration: '30s', target: TARGET }, //warm up, o calentamiento, para evitar el cold start o arranque en frio.
+    { duration: DURATION, target: TARGET }, // el stress tests propiamente dicho.
+    { duration: '30s', target: 0 },// cool down , lentamente ir enfriando la app.
   ],
   thresholds: {
     http_req_duration: ['p(95)<5000'],

@@ -4,7 +4,7 @@ namespace PlataformaPedidos.Servicios;
 
 public class ServicioNotificacion : IServicioNotificacion
 {
-    public bool Notificar()
+    public bool Notificar(string mensaje)
     {
         var random = new Random();
         for (int i = 0; i < 100_000; i++)

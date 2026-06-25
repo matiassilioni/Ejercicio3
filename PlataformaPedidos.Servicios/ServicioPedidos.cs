@@ -79,7 +79,7 @@ public class ServicioPedidos : IServicioPedidos
 
         if (graboBien)
         {
-            _servicioNotificacion.Notificar();
+            _servicioNotificacion.Notificar($"{pedido.Id}:{pedido.Estado}");
         }
 
         return graboBien;
@@ -105,7 +105,7 @@ public class ServicioPedidos : IServicioPedidos
 
             if (graboBien)
             {
-                _servicioNotificacion.Notificar();
+                _servicioNotificacion.Notificar($"{pedido.Id}:{pedido.Estado}");
             }
 
             return graboBien;

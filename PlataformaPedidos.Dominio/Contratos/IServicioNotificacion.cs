@@ -2,6 +2,6 @@
 
 public interface IServicioNotificacion
 {
-    public bool Notificar();
+    public bool Notificar(string mensaje);
 
 }
