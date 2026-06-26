@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using PlataformaPedidos.Dominio.Contratos;
 using PlataformaPedidos.Dominio.Contratos.Persistencia;
 using PlataformaPedidos.Persistencia.MySQL;
+using PlataformaPedidos.Queue.Azure;
 using PlataformaPedidos.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +37,8 @@ builder.Services.AddScoped<IRepositorioPedidos>(sp =>
 builder.Services.AddScoped<IServicioCliente, ServicioCliente>();
 builder.Services.AddScoped<IServicioProducto, ServicioProducto>();
 builder.Services.AddScoped<IServicioPedidos, ServicioPedidos>();
-builder.Services.AddScoped<IServicioNotificacion, ServicioNotificacion>();
+builder.Services.AddScoped<IServicioNotificacion>(_ =>
+    new ServicioNotificacionQueue(builder.Configuration.GetConnectionString("AzureStorage")));
 
 var app = builder.Build();
 

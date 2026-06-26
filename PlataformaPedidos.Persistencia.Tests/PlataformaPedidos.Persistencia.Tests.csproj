@@ -8,16 +8,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="Azure.Storage.Queues" Version="12.27.1" />
+        <PackageReference Include="coverlet.collector" Version="6.0.4" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="NSubstitute" Version="6.0.0-rc.1" />
-        <PackageReference Include="xunit" Version="2.9.3"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"/>
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="Xunit"/>
-        <Using Include="Microsoft.Extensions.Logging"/>
+        <Using Include="Xunit" />
+        <Using Include="Microsoft.Extensions.Logging" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +26,7 @@
         <ProjectReference Include="..\PlataformaPedidos.Persistencia.MySQL\PlataformaPedidos.Persistencia.MySQL.csproj" />
         <ProjectReference Include="..\PlataformaPedidos.Repositorio.Postgress\PlataformaPedidos.Repositorio.Postgress.csproj" />
         <ProjectReference Include="..\PlataformaPedidos.Persistencia.mongodb\PlataformaPedidos.Persistencia.mongodb.csproj" />
+        <ProjectReference Include="..\PlataformaPedidos.Queue.Azure\PlataformaPedidos.Queue.Azure.csproj" />
     </ItemGroup>
 
 </Project>
