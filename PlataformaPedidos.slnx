@@ -7,4 +7,6 @@
   <Project Path="PlataformaPedidos.Persistencia.mongodb/PlataformaPedidos.Persistencia.mongodb.csproj" />
   <Project Path="PlataformaPedidos.Persistencia.Tests/PlataformaPedidos.Persistencia.Tests.csproj" />
   <Project Path="PlataformaPedidos.Api/PlataformaPedidos.Api.csproj" />
+  <Project Path="PlataformaPedidos.Queue.Azure/PlataformaPedidos.Queue.Azure.csproj" />
+  <Project Path="PlataformaPedidos.Queue.Consumer/PlataformaPedidos.Queue.Consumer.csproj" />
 </Solution>
